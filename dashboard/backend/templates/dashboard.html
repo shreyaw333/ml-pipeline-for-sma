@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Analytics Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0b0d;
+            color: #ffffff;
+            overflow-x: auto;
+        }
+        
+        .dashboard {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0b0d 0%, #1a1d29 100%);
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+        
+        .header h1 {
+            font-size: 2.2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #ff6b9d, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #8892b0;
+            font-size: 1.1em;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            height: calc(100vh - 120px);
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .card {
+            background: rgba(26, 29, 41, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .user-profile {
+            text-align: center;
+            padding: 30px 20px;
+        }
+        
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .user-role {
+            color: #8892b0;
+            font-size: 0.9em;
+        }
+        
+        .nav-menu {
+            flex: 1;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #8892b0;
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+        
+        .stats-overview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #8892b0;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .main-chart {
+            flex: 1;
+            position: relative;
+        }
+        
+        .chart-title {
+            color: white;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .chart-container {
+            height: calc(100% - 50px);
+            position: relative;
+        }
+        
+        .secondary-charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            height: 200px;
+        }
+        
+        .sentiment-chart,
+        .engagement-chart {
+            position: relative;
+        }
+        
+        .trending-topics {
+            flex: 1;
+        }
+        
+        .trend-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .trend-item:last-child {
+            border-bottom: none;
+        }
+        
+        .hashtag {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+        
+        .mentions {
+            color: #8892b0;
+            font-size: 0.9em;
+        }
+        
+        .performance-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .metric-label {
+            color: #8892b0;
+        }
+        
+        .metric-bar {
+            width: 100px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0 15px;
+        }
+        
+        .metric-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+            min-width: 40px;
+            text-align: right;
+        }
+        
+        .status-indicators {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-active {
+            background: #00ff88;
+        }
+        
+        .status-warning {
+            background: #ffd93d;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .gradient-cyan { background: linear-gradient(135deg, #00d4ff, #0099cc); }
+        .gradient-pink { background: linear-gradient(135deg, #ff6b9d, #cc5577); }
+        .gradient-yellow { background: linear-gradient(135deg, #ffd93d, #ccaa00); }
+        .gradient-green { background: linear-gradient(135deg, #00ff88, #00cc66); }
+        
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .secondary-charts {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+        
+        .live-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+        }
+        
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="live-indicator">
+        <div class="pulse-dot"></div>
+        <span>LIVE</span>
+    </div>
+    
+    <div class="dashboard">
+        <div class="header">
+            <h1>Social Media Analytics</h1>
+            <p>Real-time Instagram sentiment analysis and trend detection</p>
+        </div>
+        
+        <div class="dashboard-grid">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="card user-profile">
+                    <div class="user-avatar">ML</div>
+                    <div class="user-name">ML Pipeline</div>
+                    <div class="user-role">Analytics Dashboard</div>
+                </div>
+                
+                <div class="card nav-menu">
+                    <div class="nav-item active">Dashboard</div>
+                    <div class="nav-item">Analytics</div>
+                    <div class="nav-item">Reports</div>
+                    <div class="nav-item">Trends</div>
+                    <div class="nav-item">Settings</div>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="stats-overview">
+                    <div class="stat-card gradient-cyan">
+                        <div class="stat-value" id="total-posts">0</div>
+                        <div class="stat-label">Posts Processed</div>
+                    </div>
+                    <div class="stat-card gradient-pink">
+                        <div class="stat-value" id="sentiment-score">0%</div>
+                        <div class="stat-label">Positive Sentiment</div>
+                    </div>
+                    <div class="stat-card gradient-yellow">
+                        <div class="stat-value" id="engagement-rate">0</div>
+                        <div class="stat-label">Avg Engagement</div>
+                    </div>
+                    <div class="stat-card gradient-green">
+                        <div class="stat-value" id="processing-rate">0</div>
+                        <div class="stat-label">Posts/Min</div>
+                    </div>
+                </div>
+                
+                <div class="card main-chart">
+                    <div class="chart-title">Sentiment Analysis Over Time</div>
+                    <div class="chart-container">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="secondary-charts">
+                    <div class="card sentiment-chart">
+                        <div class="chart-title">Sentiment Distribution</div>
+                        <canvas id="sentimentChart"></canvas>
+                    </div>
+                    <div class="card engagement-chart">
+                        <div class="chart-title">Engagement Metrics</div>
+                        <canvas id="engagementChart"></canvas>
+                    </div> 
+                </div>
+            </div>
+            
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <div class="card trending-topics">
+                    <div class="chart-title">Trending Topics</div>
+                    <div id="trending-list">
+                        <div class="trend-item">
+                            <span class="hashtag">#Loading...</span>
+                            <span class="mentions">0 mentions</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card performance-metrics">
+                    <div class="chart-title">System Performance</div>
+                    <div class="metric-row">
+                        <span class="metric-label">CPU Usage</span>
+                        <div class="metric-bar">
+                            <div class="metric-fill gradient-cyan" style="width: 45%"></div>
+                        </div>
+                        <span class="metric-value">45%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Memory</span>
+                        <div class="metric-bar">
+                            <div class="metric-fill gradient-pink" style="width: 68%"></div>
+                        </div>
+                        <span class="metric-value">68%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Network</span>
+                        <div class="metric-bar">
+                            <div class="metric-fill gradient-yellow" style="width: 23%"></div>
+                        </div>
+                        <span class="metric-value">23%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Pipeline</span>
+                        <div class="metric-bar">
+                            <div class="metric-fill gradient-green" style="width: 92%"></div>
+                        </div>
+                        <span class="metric-value">92%</span>
+                    </div>
+                    
+                    <div class="status-indicators">
+                        <div class="status-dot status-active"></div>
+                        <span style="color: #8892b0; font-size: 0.9em;">All systems operational</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mainChart = null;
+        let sentimentChart = null;
+        let engagementChart = null;
+        
+        // Initialize charts
+        function initCharts() {
+            // Main trend chart
+            const mainCtx = document.getElementById('mainChart').getContext('2d');
+            mainChart = new Chart(mainCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                    datasets: [{
+                        label: 'Positive',
+                        data: [65, 68, 72, 75, 73, 78, 82],
+                        borderColor: '#00ff88',
+                        backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Neutral',
+                        data: [25, 23, 20, 18, 20, 15, 12],
+                        borderColor: '#ffd93d',
+                        backgroundColor: 'rgba(255, 217, 61, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Negative',
+                        data: [10, 9, 8, 7, 7, 7, 6],
+                        borderColor: '#ff6b9d',
+                        backgroundColor: 'rgba(255, 107, 157, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#8892b0'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8892b0'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8892b0'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Sentiment doughnut chart
+            const sentCtx = document.getElementById('sentimentChart').getContext('2d');
+            sentimentChart = new Chart(sentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Neutral', 'Negative'],
+                    datasets: [{
+                        data: [65, 25, 10],
+                        backgroundColor: [
+                            '#00ff88',
+                            '#ffd93d',
+                            '#ff6b9d'
+                        ],
+                        borderWidth: 0,
+                        cutout: '60%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#8892b0',
+                                padding: 15
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Engagement bar chart
+            const engCtx = document.getElementById('engagementChart').getContext('2d');
+            engagementChart = new Chart(engCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Likes', 'Comments', 'Shares', 'Saves'],
+                    datasets: [{
+                        data: [2847, 892, 234, 567],
+                        backgroundColor: [
+                            '#00d4ff',
+                            '#ff6b9d',
+                            '#ffd93d',
+                            '#00ff88'
+                        ],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#8892b0'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8892b0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Fetch and update data
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/metrics');
+                const data = await response.json();
+                
+                // Update stats cards
+                document.getElementById('total-posts').textContent = data.total_posts || 0;
+                document.getElementById('engagement-rate').textContent = Math.round(data.avg_engagement || 0);
+                document.getElementById('processing-rate').textContent = Math.round(data.processing_rate || 0);
+                
+                // Update sentiment percentage
+                const sentiment = data.sentiment_distribution || {positive: 0, negative: 0, neutral: 0};
+                const total = sentiment.positive + sentiment.negative + sentiment.neutral;
+                const positivePercent = total > 0 ? Math.round((sentiment.positive / total) * 100) : 0;
+                document.getElementById('sentiment-score').textContent = positivePercent + '%';
+                
+                // Update sentiment chart
+                if (sentimentChart && total > 0) {
+                    const posPercent = Math.round((sentiment.positive / total) * 100);
+                    const neuPercent = Math.round((sentiment.neutral / total) * 100);
+                    const negPercent = Math.round((sentiment.negative / total) * 100);
+                    
+                    sentimentChart.data.datasets[0].data = [posPercent, neuPercent, negPercent];
+                    sentimentChart.update('none');
+                }
+                
+                // Update trending topics
+                if (data.top_hashtags && data.top_hashtags.length > 0) {
+                    const trendingList = document.getElementById('trending-list');
+                    trendingList.innerHTML = data.top_hashtags.slice(0, 8).map(item => `
+                        <div class="trend-item">
+                            <span class="hashtag">${item.hashtag}</span>
+                            <span class="mentions">${item.count} mentions</span>
+                        </div>
+                    `).join('');
+                }
+                
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            fetchData();
+            setInterval(fetchData, 5000);
+        });
+    </script>
+</body>
+</html>

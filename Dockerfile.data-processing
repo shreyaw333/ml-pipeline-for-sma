@@ -1,0 +1,31 @@
+# Dockerfile.data-processing
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY src/data_processing/ ./src/data_processing/
+COPY src/utils/ ./src/utils/
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV KAFKA_SERVERS=kafka-service:9092
+
+# Create data directory
+RUN mkdir -p /app/data/processed
+
+# Expose port for health checks
+EXPOSE 8001
+
+WORKDIR /app/src/data_processing
+
+CMD ["python", "simple_processor.py"]

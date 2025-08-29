@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Logs
+*.log
+
+# Data
+data/
+*.csv
+*.json
+*.xlsx
+
+# Models
+*.h5
+*.pkl
+*.joblib
+*.pt
+*.pth

@@ -1,0 +1,28 @@
+# Dockerfile.data-ingestion
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY src/data_ingestion/ ./src/data_ingestion/
+COPY src/utils/ ./src/utils/
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV KAFKA_SERVERS=kafka-service:9092
+
+# Expose port for health checks
+EXPOSE 8000
+
+WORKDIR /app/src/data_ingestion
+
+CMD ["python", "data_generator.py"]
