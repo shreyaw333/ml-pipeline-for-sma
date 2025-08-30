@@ -1,6 +1,3 @@
-Here's the complete README.md content to paste into VS Code:
-
-```markdown
 # Instagram Analytics ML Pipeline
 
 <div align="center">
@@ -96,4 +93,4 @@ The interactive dashboard provides real-time monitoring of:
 - **Reports**: Generated insights and trend reports
 - **Trends**: Detailed trend analysis and predictions
 - **Settings**: Configuration and system preferences
-```
+
